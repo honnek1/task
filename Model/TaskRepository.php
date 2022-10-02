@@ -53,7 +53,7 @@ class TaskRepository
      * Устанавливает новую задачу
      * @param Task $task
      */
-    public function setNewTask(Task $task): void
+    public function addNewTask(Task $task): void
     {
         $sql = 'INSERT INTO `task` (user, email, text) VALUES (:user, :email, :text)';
 
@@ -116,7 +116,7 @@ class TaskRepository
      * @param int $id
      * @param string $newText
      */
-    public function editTaskText(int $id, string $newText): void
+    public function updateTaskText(int $id, string $newText): void
     {
         $sql = 'UPDATE `task` SET `text` = :newText WHERE `id` = :id';
 
@@ -124,6 +124,7 @@ class TaskRepository
             ':id' => $id,
             ':newText' => $newText,
         ];
+
         $query = $this->pdo->prepare($sql);
         $query->execute($params);
     }
@@ -133,7 +134,7 @@ class TaskRepository
      * @param int $id
      * @param string $newStatus
      */
-    public function editTaskStatus(int $id, string $newStatus): void
+    public function updateTaskStatus(int $id, string $newStatus): void
     {
         $sql = 'UPDATE `task` SET `status` = :newStatus WHERE `id` = :id';
 
@@ -141,6 +142,7 @@ class TaskRepository
             ':id' => $id,
             ':newStatus' => $newStatus,
         ];
+
         $query = $this->pdo->prepare($sql);
         $query->execute($params);
     }

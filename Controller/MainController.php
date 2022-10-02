@@ -79,7 +79,7 @@ class MainController
         $task->setUser($postParams['user']);
         $task->setText($postParams['text']);
 
-        $this->taskRepository->setNewTask($task);
+        $this->taskRepository->addNewTask($task);
 
         header('Location: http://localhost/project/src/index.php/main/main');
     }
@@ -93,6 +93,10 @@ class MainController
      */
     public function actionEdit(?array $params, ?array $postParams)
     {
+        session_start();
+        if (null === $_SESSION['user_id']) {
+            throw new Exception('Ошибка доступа!!');
+        }
         if (empty($postParams)) {
             throw new Exception(message: 'Не найден POST запрос');
         }
@@ -102,11 +106,11 @@ class MainController
         }
         if (isset($postParams['text'])) {
             $newText = $postParams['text'];
-            $this->taskRepository->editTaskText($id, $newText);
+            $this->taskRepository->updateTaskText($id, $newText);
         }
         if (isset($postParams['newStatus'])) {
             $newStatus = $postParams['newStatus'];
-            $this->taskRepository->editTaskStatus($id, $newStatus);
+            $this->taskRepository->updateTaskStatus($id, $newStatus);
         }
 
         header('Location: http://localhost/project/src/index.php/main/main');
@@ -117,21 +121,30 @@ class MainController
      *
      * @param array|null $params
      * @param array|null $postParams
+     * @throws Exception
      */
-    public function actionLogin(?array $params, ?array $postParams)
+    public function actionLogin(?array $params, ?array $postParams): void
     {
-        $postParams = empty($postParams) ? null : $postParams;
-        if (null !== $postParams) {
-            $user = new User();
-            $user->setName($postParams['user']);
-            $user->setPassword(sha1($postParams['pass']));
-            $isExist = $this->userRepository->isExist($user);
+        $name = empty($postParams['user']) ? null : $postParams['user'];
+        $pass = empty($postParams['pass']) ? null : $postParams['pass'];
 
-            if ($isExist) {
-                session_start();
-                $_SESSION['user_id'] = $user->getName();
-                header('Location: http://localhost/project/src/index.php/main/main');
-                exit();
+        if (!empty($postParams)) {
+            if (null === $name || null === $pass) {
+                throw new Exception('поля обязательны для заполнения');
+            } else {
+                $user = new User();
+                $user->setName($name);
+                $user->setPassword(sha1($pass));
+                $isExist = $this->userRepository->isExist($user);
+
+                if ($isExist) {
+                    session_start();
+                    $_SESSION['user_id'] = $user->getName();
+                    header('Location: http://localhost/project/src/index.php/main/main');
+                    exit();
+                } else {
+                    throw new Exception('Неверные реквизиты для входа');
+                }
             }
         }
 
@@ -149,7 +162,6 @@ class MainController
         header('Location: http://localhost/project/src/index.php/main/main');
         exit();
     }
-
 
 
 }
