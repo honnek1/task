@@ -31,6 +31,12 @@ class Router
     {
         $query = $request['QUERY_STRING'];
         $path = $request['REQUEST_URI'];
+        
+        // Защита от LFI
+        if ((preg_match('/.*?\/\.\.\/.*/', $path))) {
+            throw new Exception('Введен неверный адрес сайта');
+        }
+
         $arrayPath = explode('/', $path);
         $this->controllerName = ucfirst($arrayPath[count($arrayPath) - 2]) . 'Controller';
         $this->action = 'action' . ucfirst(explode('?', $arrayPath[count($arrayPath) - 1])[0]);
